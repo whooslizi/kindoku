@@ -11,6 +11,7 @@ type Entry struct {
 	MangaKey   string `json:"mangaKey"`
 	ChapterKey string `json:"chapterKey"`
 	RelPath    string `json:"relPath"`
+	Title      string `json:"title,omitempty"` // manga title, for grouping when there are no manga folders
 	Pages      int    `json:"pages"`
 	Bytes      int64  `json:"bytes"`
 	TS         int64  `json:"ts"`

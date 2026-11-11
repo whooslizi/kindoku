@@ -57,3 +57,18 @@ func TestParseArgs(t *testing.T) {
 		t.Fatal("missing flag value must fail")
 	}
 }
+
+func TestIndexRmKeepsFlatFolder(t *testing.T) {
+	data, folder := t.TempDir(), t.TempDir()
+	os.WriteFile(filepath.Join(folder, "A - 001.0.cbz"), []byte("x"), 0o644)
+	ix, _ := store.LoadIndex(data)
+	ix.Put(store.Entry{Source: "s", MangaKey: "a", ChapterKey: "1", RelPath: "A - 001.0.cbz"})
+	ix.Save()
+	x := &app{data: data}
+	if _, err := x.index("rm", args{pos: []string{"rm", "A - 001.0.cbz"}, flags: map[string]string{"out": folder}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(folder); err != nil {
+		t.Errorf("download folder was removed with its last chapter: %v", err)
+	}
+}

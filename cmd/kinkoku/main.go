@@ -29,7 +29,7 @@ const usage = `kinkoku ` + "%s" + ` — Aidoku sources for KOReader
   search-all <query>
   listing <src> <listingId> [--page N]
   manga <src> <mangaKey>
-  download <src> <mangaKey> <chapterKey...> --out <folder> [--eink] [--dither] [--maxw 1072 --maxh 1448] [--conc 2]
+  download <src> <mangaKey> <chapterKey...> --out <folder> [--eink] [--dither] [--maxw 1072 --maxh 1448] [--conc 2] [--flat]
   index list | index rm <relPath> [--out <folder>] | index move <fromFolder> <toFolder>
   settings get <src> [key] | settings set <src> <key> <value>
   cookies import <file> | cookies clear
@@ -43,7 +43,7 @@ type args struct {
 	flags map[string]string
 }
 
-var boolFlags = map[string]bool{"eink": true, "dither": true}
+var boolFlags = map[string]bool{"eink": true, "dither": true, "flat": true}
 
 func parseArgs(in []string) (args, error) {
 	a := args{flags: map[string]string{}}
