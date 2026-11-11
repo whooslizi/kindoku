@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-const releasesURL = "https://api.github.com/repos/whooslizi/kindoku/releases/latest"
+const releasesURL = "https://api.github.com/repos/whooslizi/kinkoku/releases/latest"
 
 // arch is set at build time (armv6, armv7, arm64, x64) and picks the release asset.
 var arch = ""
