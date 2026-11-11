@@ -94,6 +94,8 @@ Everything is plain JSON in the data folder, written with `store.WriteAtomic` (t
 | `index.json` | downloaded chapters |
 | `flaresolverr.json` | User-Agent per host, saved after a FlareSolverr solve |
 | `cache/cover.jpg` | the cover shown on the manga details screen |
+| `logs/error.log` | one line per failed command: time, version, arch, arguments, error |
+| `logs/crash.log` | Go panic traces from any goroutine (`debug.SetCrashOutput`) |
 
 The plugin keeps its own settings (download folder, library, toggles, chapter order for "next
 chapter") in KOReader's `settings/kinkoku.lua`.

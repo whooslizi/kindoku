@@ -69,6 +69,8 @@ lines `{"ch":"<chapterKey>","p":3,"n":20}` on stderr and removes its partial `.c
 
 State lives in `--data <dir>` (or `KINKOKU_DATA`, default `~/.kinkoku`) as plain JSON files:
 `repos.json`, `sources/<id>/` (the unpacked source plus `defaults.json`), `cookies.json`, `index.json`.
+Failed commands are appended to `logs/error.log` and crashes to `logs/crash.log` (on the Kindle:
+`koreader/settings/kinkoku/logs/`).
 Other environment variables: `KINKOKU_FLARESOLVERR` (e.g. `http://192.168.1.2:8191`, used only on
 Cloudflare/DDoS-Guard 403/503 challenges) and `KINKOKU_LANG` (preferred source language).
 

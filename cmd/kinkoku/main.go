@@ -96,6 +96,7 @@ type app struct {
 func main() {
 	out, err := run(context.Background(), os.Args[1:])
 	if err != nil {
+		logError(err)
 		json.NewEncoder(os.Stdout).Encode(map[string]string{"error": err.Error()})
 		os.Exit(1)
 	}
@@ -129,6 +130,7 @@ func run(ctx context.Context, argv []string) (any, error) {
 	if err := os.MkdirAll(data, 0o755); err != nil {
 		return nil, err
 	}
+	startLogs(data)
 	jar, err := store.LoadJar(data)
 	if err != nil {
 		return nil, fmt.Errorf("cookies.json: %w", err)
