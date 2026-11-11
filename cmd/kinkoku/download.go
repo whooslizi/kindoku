@@ -42,7 +42,7 @@ type chapterResult struct {
 }
 
 func (x *app) download(ctx context.Context, a args) (any, error) {
-	const use = "download <src> <mangaKey> <chapterKey...> --out <folder> [--eink] [--dither] [--maxw N --maxh N] [--conc N]"
+	const use = "download <src> <mangaKey> <chapterKey...> --out <folder> [--eink] [--dither] [--maxw N --maxh N] [--conc N] [--flat]"
 	if err := a.need(3, use); err != nil {
 		return nil, err
 	}
@@ -92,12 +92,17 @@ func (x *app) download(ctx context.Context, a args) (any, error) {
 	if title == "" {
 		title = m.Key
 	}
+	// --flat saves chapters straight into the folder, named "<Manga> - <chapter>.cbz", without a cover
+	flat := a.flags["flat"] == "true"
 	mangaDir := cbz.Sanitize(title)
+	if flat {
+		mangaDir = ""
+	}
 	if err := os.MkdirAll(filepath.Join(folder, mangaDir), 0o755); err != nil {
 		return nil, err
 	}
 	removeStaleTemps(filepath.Join(folder, mangaDir))
-	if cover := filepath.Join(folder, mangaDir, "cover.jpg"); !exists(cover) && m.Cover != "" {
+	if cover := filepath.Join(folder, mangaDir, "cover.jpg"); !flat && !exists(cover) && m.Cover != "" {
 		if b, err := x.coverJPEG(s, m.Cover, o.img); err == nil {
 			store.WriteAtomic(cover, b)
 		}
@@ -125,7 +130,11 @@ func (x *app) download(ctx context.Context, a args) (any, error) {
 				r.RelPath, r.Pages, r.Bytes, r.Skipped = e.RelPath, e.Pages, e.Bytes, true
 				break
 			}
-			rel := filepath.ToSlash(filepath.Join(mangaDir, uniqueName(ix, src, m.Key, mangaDir, ch)+".cbz"))
+			name := cbz.ChapterName(ch.Number, ch.Title, ch.Key)
+			if flat {
+				name = cbz.FlatName(title, ch.Number, ch.Title, ch.Key)
+			}
+			rel := filepath.ToSlash(filepath.Join(mangaDir, uniqueName(ix, src, m.Key, mangaDir, name, ch.Key)+".cbz"))
 			var err error
 			r.Pages, r.Bytes, err = x.downloadChapter(ctx, s, m, *ch, filepath.Join(folder, rel), o, progress)
 			if err != nil {
@@ -133,7 +142,7 @@ func (x *app) download(ctx context.Context, a args) (any, error) {
 				break
 			}
 			r.RelPath = rel
-			ix.Put(store.Entry{Source: src, MangaKey: m.Key, ChapterKey: key, RelPath: rel, Pages: r.Pages, Bytes: r.Bytes})
+			ix.Put(store.Entry{Source: src, MangaKey: m.Key, ChapterKey: key, RelPath: rel, Title: title, Pages: r.Pages, Bytes: r.Bytes})
 			if err := ix.Save(); err != nil {
 				return nil, err
 			}
@@ -161,14 +170,13 @@ func findChapter(cs []source.Chapter, key string) *source.Chapter {
 	return nil
 }
 
-// uniqueName returns the chapter's file name, suffixed with a key hash if another chapter
-// (e.g. a different scanlation of the same number) already uses it.
-func uniqueName(ix *store.Index, src, mangaKey, dir string, ch *source.Chapter) string {
-	name := cbz.ChapterName(ch.Number, ch.Title, ch.Key)
+// uniqueName returns name, suffixed with a key hash if another chapter (e.g. a different
+// scanlation of the same number) already uses it.
+func uniqueName(ix *store.Index, src, mangaKey, dir, name, chapterKey string) string {
 	rel := filepath.ToSlash(filepath.Join(dir, name+".cbz"))
 	for _, e := range ix.Entries {
-		if e.RelPath == rel && !(e.Source == src && e.MangaKey == mangaKey && e.ChapterKey == ch.Key) {
-			sum := sha1.Sum([]byte(ch.Key))
+		if e.RelPath == rel && !(e.Source == src && e.MangaKey == mangaKey && e.ChapterKey == chapterKey) {
+			sum := sha1.Sum([]byte(chapterKey))
 			return name + " [" + hex.EncodeToString(sum[:3]) + "]"
 		}
 	}
@@ -407,7 +415,9 @@ func (x *app) index(sub string, a args) (any, error) {
 			if err := os.Remove(p); err != nil && !errors.Is(err, os.ErrNotExist) {
 				return nil, err
 			}
-			removeIfOnlyCover(filepath.Dir(p))
+			if dir := filepath.Dir(p); filepath.Clean(dir) != filepath.Clean(folder) {
+				removeIfOnlyCover(dir)
+			}
 		}
 		return map[string]string{"removed": rel}, ix.Save()
 	case "move":
@@ -447,7 +457,7 @@ func moveAll(ix *store.Index, from, to string) (any, error) {
 			continue
 		}
 		dir := filepath.Dir(filepath.FromSlash(e.RelPath))
-		if !dirs[dir] {
+		if dir != "." && !dirs[dir] {
 			dirs[dir] = true
 			moveFile(filepath.Join(from, dir, "cover.jpg"), filepath.Join(to, dir, "cover.jpg")) // optional
 		}

@@ -74,7 +74,9 @@ Errors come back as `{"error": "..."}` with a non-zero exit code.
 3. Each page goes through `source.ProcessPage` (for sources that descramble images), then
    `eink.Optimize` when `--eink` is set: grayscale, Catmull-Rom downscale to the screen, 16 gray
    levels, 4-bit PNG. Strips taller than 2:1 (webtoons) are fitted to the screen width only.
-4. `cbz.Writer` writes `<Chapter>.cbz.tmp`, adds `ComicInfo.xml`, and renames it into place. On
+4. The file goes to `<Manga>/<Chapter>.cbz`, or `<Manga> - <Chapter>.cbz` in the folder itself with
+   `--flat` (the "Save each manga in its own folder" setting turned off).
+   `cbz.Writer` writes `<Chapter>.cbz.tmp`, adds `ComicInfo.xml`, and renames it into place. On
    failure or SIGTERM the `.tmp` is deleted.
 5. The chapter is added to `index.json`, which maps source, manga and chapter keys to the file's
    path relative to the download folder.
