@@ -78,6 +78,13 @@ local vi = {
     ["needs JavaScript"] = "cần JavaScript",
     ["on"] = "bật",
     ["off"] = "tắt",
+    ["Check for updates"] = "Kiểm tra cập nhật",
+    ["Checking for updates…"] = "Đang kiểm tra cập nhật…",
+    ["Kinkoku %1 is up to date."] = "Kinkoku %1 đã là bản mới nhất.",
+    ["Kinkoku %1 is available (you have %2). Update now?"] = "Đã có Kinkoku %1 (bạn đang dùng %2). Cập nhật ngay?",
+    ["Update"] = "Cập nhật",
+    ["Updating…"] = "Đang cập nhật…",
+    ["Updated to %1. Restart KOReader to use it."] = "Đã cập nhật lên %1. Khởi động lại KOReader để dùng.",
 }
 
 local lang = G_reader_settings and G_reader_settings:readSetting("language") or ""

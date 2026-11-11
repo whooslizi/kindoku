@@ -33,6 +33,7 @@ const usage = `kinkoku ` + "%s" + ` — Aidoku sources for KOReader
   index list | index rm <relPath> [--out <folder>] | index move <fromFolder> <toFolder>
   settings get <src> [key] | settings set <src> <key> <value>
   cookies import <file> | cookies clear
+  update [--plugin <dir>]   check for (and install) the latest release
 
 Global: --data <dir> (or KINKOKU_DATA). Env: KINKOKU_FLARESOLVERR, KINKOKU_LANG.
 `
@@ -115,7 +116,7 @@ func run(ctx context.Context, argv []string) (any, error) {
 		return nil, nil
 	}
 	if a.pos[0] == "version" {
-		return map[string]string{"version": version}, nil
+		return map[string]string{"version": version, "arch": arch}, nil
 	}
 	data := a.flags["data"]
 	if data == "" {
@@ -163,6 +164,8 @@ func run(ctx context.Context, argv []string) (any, error) {
 		return x.settings(sub, a)
 	case "cookies":
 		return x.cookies(sub, a)
+	case "update":
+		return x.update(ctx, a)
 	}
 	return nil, fmt.Errorf("unknown command %q (try `kinkoku help`)", cmd)
 }

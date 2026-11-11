@@ -9,15 +9,17 @@ offline. Fewer features, lower battery use.
 
 ## Install
 
-1. Download `kinkoku.koplugin.zip` from the [latest release](../../releases/latest).
+1. Download the zip for your device from the [latest release](../../releases/latest):
+   `kinkoku-armv7.koplugin.zip` for a Kindle Basic 11 (and most Kindles and Kobos), `armv6` for older
+   ARM devices, `arm64` for 64-bit ARM, `x64` for desktop Linux.
 2. Unzip it and copy the `kinkoku.koplugin` folder to `/mnt/us/koreader/plugins/` on the Kindle
    (or the `plugins/` folder of any KOReader install).
 3. Restart KOReader. Open the top menu, then the search tab, then **Kinkoku**.
 4. Tap the menu icon (top left), then **Sources**, **Add source list**. The Aidoku Community list is
    pre-filled. Then **Install sources**.
 
-The plugin picks the binary for your device with `uname -m` (armv6, armv7, arm64, x64). Built for
-a Kindle Basic 11 (armv7); the armv7 binary is about 10 MB.
+Each zip holds the binary for one architecture only (about 4 MB zipped). **Settings > Check for
+updates** fetches the latest GitHub release for the same architecture and installs it in place.
 
 ## Use
 
@@ -31,7 +33,7 @@ a Kindle Basic 11 (armv7); the armv7 binary is about 10 MB.
 - At the end of a chapter, kinkoku offers the **next chapter** (and downloads it if needed).
 - **Settings**: download folder (default `/mnt/us/manga`; changing it offers to move existing files),
   e-ink optimization, dithering, Wi-Fi off after downloads, pages downloaded at once (1–4),
-  FlareSolverr host, cookie import.
+  FlareSolverr host, cookie import, check for updates.
 
 Chapters are saved as `<folder>/<Manga Title>/<NNN.N> - <Chapter Title>.cbz` with a `ComicInfo.xml`,
 plus `cover.jpg` once per manga. They are plain CBZs: KOReader opens them with the plugin disabled.
@@ -42,7 +44,8 @@ as 4-bit PNGs. In testing, a 14-page chapter went from 18 MB of source images to
 
 ## What's not here
 
-No history, trackers, home feeds, background updates or notifications. Sources that need JavaScript (WebView) are listed as unsupported. See
+No history, trackers, home feeds, background updates or notifications. Sources that need
+JavaScript (WebView) are listed as unsupported. See
 [docs/abi.md](docs/abi.md) for exactly which host functions are implemented.
 
 ## CLI
@@ -58,6 +61,7 @@ kinkoku download <src> <mangaKey> <chapterKey...> --out <folder> [--eink] [--dit
 kinkoku index list | index rm <relPath> [--out <folder>] | index move <fromFolder> <toFolder>
 kinkoku settings get <src> [key] | settings set <src> <key> <value>
 kinkoku cookies import <cookies.txt> | cookies clear
+kinkoku update [--plugin <dir>]
 ```
 
 Output is JSON on stdout; errors exit non-zero with `{"error": "..."}`. `download` prints progress
@@ -82,7 +86,7 @@ scripts/build.sh                           # builds kinkoku.koplugin/bin/{armv6,
 ```
 
 Every push to the default branch runs the tests, builds all architectures and publishes a GitHub
-release with `kinkoku.koplugin.zip`.
+release with one `kinkoku-<arch>.koplugin.zip` per architecture.
 
 ## Credits
 

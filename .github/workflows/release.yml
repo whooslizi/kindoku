@@ -30,13 +30,16 @@ jobs:
           echo "VERSION=v0.1.${{ github.run_number }}" >> "$GITHUB_ENV"
           scripts/build.sh "v0.1.${{ github.run_number }}"
           mkdir -p dist
-          zip -qr dist/kinkoku.koplugin.zip kinkoku.koplugin
+          for arch in armv6 armv7 arm64 x64; do
+            rm -rf stage && mkdir stage && cp -r kinkoku.koplugin stage/
+            find stage/kinkoku.koplugin/bin -mindepth 1 -maxdepth 1 ! -name "$arch" -exec rm -rf {} +
+            (cd stage && zip -qr "../dist/kinkoku-$arch.koplugin.zip" kinkoku.koplugin)
+          done
 
       - name: Release
-        # only the default branch publishes; other branches just test and build
         if: github.ref_name == github.event.repository.default_branch
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$VERSION" dist/kinkoku.koplugin.zip \
+          gh release create "$VERSION" dist/*.zip \
             --target "$GITHUB_SHA" --title "kinkoku $VERSION" --generate-notes

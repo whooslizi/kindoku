@@ -9,7 +9,7 @@ build() { # arch goarch goarm
 	out=kinkoku.koplugin/bin/$1/kinkoku
 	mkdir -p "$(dirname "$out")"
 	CGO_ENABLED=0 GOOS=linux GOARCH=$2 GOARM=$3 \
-		go build -trimpath -ldflags="-s -w -X main.version=$version" -o "$out" ./cmd/kinkoku
+		go build -trimpath -ldflags="-s -w -X main.version=$version -X main.arch=$1" -o "$out" ./cmd/kinkoku
 	printf '%-6s %s bytes\n' "$1" "$(wc -c < "$out" | tr -d ' ')"
 }
 

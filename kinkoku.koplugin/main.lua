@@ -777,7 +777,30 @@ function Kinkoku:settingsItems()
                 UIManager:show(InfoMessage:new{ text = _("Cookies cleared."), timeout = 2 })
             end)
         end },
+        { text = _("Check for updates"), callback = function() self:checkUpdate() end },
     }
+end
+
+function Kinkoku:checkUpdate()
+    self:online(function()
+        local r, err = self:run({ "update" }, _("Checking for updates…"))
+        if not r then return err end
+        if r.available ~= true then
+            UIManager:show(InfoMessage:new{ text = T(_("Kinkoku %1 is up to date."), r.current), timeout = 3 })
+            return
+        end
+        UIManager:show(ConfirmBox:new{
+            text = T(_("Kinkoku %1 is available (you have %2). Update now?"), r.latest, r.current),
+            ok_text = _("Update"),
+            ok_callback = function()
+                self:online(function()
+                    local u, uerr = self:run({ "update", "--plugin", self.path }, _("Updating…"))
+                    if not u then return uerr end
+                    UIManager:askForRestart(T(_("Updated to %1. Restart KOReader to use it."), u.installed))
+                end)
+            end,
+        })
+    end)
 end
 
 function Kinkoku:showSettings()
