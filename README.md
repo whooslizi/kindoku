@@ -1,2 +1,97 @@
-# kindoku
-A scrappy Go rewrite of the Aidoku integration for KOReader
+# kinkoku
+
+A scrappy rewrite of the Aidoku integration for KOReader: read [Aidoku](https://github.com/Aidoku/Aidoku)
+sources on your Kindle, download chapters as small CBZs into a folder you choose, and read them
+offline. Fewer features, lower battery use.
+
+- `kinkoku`: one static Go binary. It runs one command, prints JSON and exits. No daemon, no database.
+- `kinkoku.koplugin`: a KOReader plugin that calls the binary and shows text-only, e-ink friendly menus.
+
+## Install
+
+1. Download `kinkoku.koplugin.zip` from the [latest release](../../releases/latest).
+2. Unzip it and copy the `kinkoku.koplugin` folder to `/mnt/us/koreader/plugins/` on the Kindle
+   (or the `plugins/` folder of any KOReader install).
+3. Restart KOReader. Open the top menu, then the search tab, then **Kinkoku**.
+4. Tap the menu icon (top left), then **Sources**, **Add source list**. The Aidoku Community list is
+   pre-filled. Then **Install sources**.
+
+The plugin picks the binary for your device with `uname -m` (armv6, armv7, arm64, x64). Built for
+a Kindle Basic 11 (armv7); the armv7 binary is about 10 MB.
+
+## Use
+
+- **Library** is the home screen: the manga you saved, with their source on the right. Hold one to
+  remove it.
+- The menu icon (top left) opens **Search all sources**, **Sources**, **Downloads** and **Settings**.
+  Hold a search result to add it to or remove it from the library (saved ones show a star).
+- A manga: tap chapters to select them, then **Download selected**. Downloaded chapters are marked
+  "downloaded"; tap one to read it.
+- **Downloads**: everything you downloaded, grouped by manga. Long-press a chapter to delete it.
+- At the end of a chapter, kinkoku offers the **next chapter** (and downloads it if needed).
+- **Settings**: download folder (default `/mnt/us/manga`; changing it offers to move existing files),
+  e-ink optimization, dithering, Wi-Fi off after downloads, pages downloaded at once (1–4),
+  FlareSolverr host, cookie import.
+
+Chapters are saved as `<folder>/<Manga Title>/<NNN.N> - <Chapter Title>.cbz` with a `ComicInfo.xml`,
+plus `cover.jpg` once per manga. They are plain CBZs: KOReader opens them with the plugin disabled.
+
+With e-ink optimization on (the default), pages are converted to 16-level grayscale, downscaled
+(never upscaled) to fit the screen (strips taller than 2:1 are fitted to the width only), and saved
+as 4-bit PNGs. In testing, a 14-page chapter went from 18 MB of source images to 4 MB.
+
+## What's not here
+
+No history, trackers, home feeds, background updates or notifications. Sources that need JavaScript (WebView) are listed as unsupported. See
+[docs/abi.md](docs/abi.md) for exactly which host functions are implemented.
+
+## CLI
+
+```
+kinkoku repo add <url> | repo list | repo install <id> | repo update
+kinkoku list
+kinkoku search <src> <query> [--page N] [--filters JSON]
+kinkoku search-all <query>
+kinkoku listing <src> <listingId> [--page N]
+kinkoku manga <src> <mangaKey>
+kinkoku download <src> <mangaKey> <chapterKey...> --out <folder> [--eink] [--dither] [--maxw 1072 --maxh 1448] [--conc 2]
+kinkoku index list | index rm <relPath> [--out <folder>] | index move <fromFolder> <toFolder>
+kinkoku settings get <src> [key] | settings set <src> <key> <value>
+kinkoku cookies import <cookies.txt> | cookies clear
+```
+
+Output is JSON on stdout; errors exit non-zero with `{"error": "..."}`. `download` prints progress
+lines `{"ch":"<chapterKey>","p":3,"n":20}` on stderr and removes its partial `.cbz.tmp` on SIGTERM.
+
+State lives in `--data <dir>` (or `KINKOKU_DATA`, default `~/.kinkoku`) as plain JSON files:
+`repos.json`, `sources/<id>/` (the unpacked source plus `defaults.json`), `cookies.json`, `index.json`.
+Other environment variables: `KINKOKU_FLARESOLVERR` (e.g. `http://192.168.1.2:8191`, used only on
+Cloudflare/DDoS-Guard 403/503 challenges) and `KINKOKU_LANG` (preferred source language).
+
+`--filters` takes FilterValues such as
+`[{"type":"select","id":"genre","value":"action"},{"type":"sort","id":"sort","index":1,"ascending":false}]`
+(types: text, sort, check, select, multiselect, range).
+
+## Build and test
+
+```sh
+go test ./...                              # unit tests (offline)
+go test -tags e2e ./cmd/kinkoku            # live: install 3 sources, search, download a chapter each
+luacheck kinkoku.koplugin
+scripts/build.sh                           # builds kinkoku.koplugin/bin/{armv6,armv7,arm64,x64}/kinkoku
+```
+
+Every push to the default branch runs the tests, builds all architectures and publishes a GitHub
+release with `kinkoku.koplugin.zip`.
+
+## Credits
+
+- [AidokuRunner](https://github.com/Aidoku/AidokuRunner) by Skittyblock: kinkoku's source runner follows
+  its behavior (how sources are loaded, the host import modules, encoding and error conventions).
+- [aidoku-rs](https://github.com/Aidoku/aidoku-rs) (MIT): the source SDK that defines the ABI.
+- [Aidoku Community sources](https://github.com/Aidoku-Community/sources) (MIT/Apache-2.0); one of them
+  is used as a test fixture (see `source/testdata/NOTICE`).
+- [wazero](https://wazero.io), [cascadia](https://github.com/andybalholm/cascadia),
+  golang.org/x/net/html and golang.org/x/image.
+
+Not affiliated with Aidoku or KOReader.

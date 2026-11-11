@@ -1,0 +1,3 @@
+en.tcbscans.aix is the TCB Scans source from Aidoku-Community/sources
+(https://github.com/Aidoku-Community/sources), licensed MIT OR Apache-2.0.
+It is used unmodified as a test fixture; the HTML it parses in tests is synthetic.
