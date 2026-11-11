@@ -90,6 +90,8 @@ local vi = {
     ["Right to left"] = "Phải sang trái",
     ["Tap to cancel"] = "Chạm để hủy",
     ["kinkoku stopped unexpectedly."] = "kinkoku dừng đột ngột.",
+    ["1 to 4. Higher is faster on good Wi-Fi."] = "Từ 1 đến 4. Càng cao càng nhanh khi Wi-Fi tốt.",
+    ["Enter a whole number from 1 to 4."] = "Hãy nhập một số nguyên từ 1 đến 4.",
 }
 
 local lang = G_reader_settings and G_reader_settings:readSetting("language") or ""

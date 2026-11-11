@@ -808,10 +808,7 @@ function Kinkoku:settingsItems()
             self:save("reading_direction", self:setting("reading_direction", "ltr") == "rtl" and "ltr" or "rtl")
             self:update(self.settings_menu, self:settingsItems())
         end },
-        { text = _("Pages downloaded at once"), mandatory = self:setting("concurrency", 2), callback = function()
-            self:save("concurrency", self:setting("concurrency", 2) % 4 + 1)
-            self:update(self.settings_menu, self:settingsItems())
-        end },
+        { text = _("Pages downloaded at once"), mandatory = self:setting("concurrency", 2), callback = function() self:editConcurrency() end },
         { text = _("FlareSolverr host"), mandatory = self:setting("flaresolverr", ""), callback = function() self:editFlareSolverr() end },
         { text = _("Import cookies.txt"), callback = function() self:importCookies() end },
         { text = _("Clear cookies"), callback = function()
@@ -879,6 +876,31 @@ function Kinkoku:chooseFolder()
             })
         end,
     })
+end
+
+function Kinkoku:editConcurrency()
+    local dialog
+    dialog = InputDialog:new{
+        title = _("Pages downloaded at once"),
+        description = _("1 to 4. Higher is faster on good Wi-Fi."),
+        input = tostring(self:setting("concurrency", 2)),
+        input_type = "number",
+        buttons = { {
+            { text = _("Cancel"), id = "close", callback = function() UIManager:close(dialog) end },
+            { text = _("Save"), is_enter_default = true, callback = function()
+                local n = tonumber(dialog:getInputText())
+                if not n or n ~= math.floor(n) or n < 1 or n > 4 then
+                    UIManager:show(InfoMessage:new{ text = _("Enter a whole number from 1 to 4."), timeout = 3 })
+                    return
+                end
+                self:save("concurrency", n)
+                UIManager:close(dialog)
+                self:update(self.settings_menu, self:settingsItems())
+            end },
+        } },
+    }
+    UIManager:show(dialog)
+    dialog:onShowKeyboard()
 end
 
 function Kinkoku:editFlareSolverr()

@@ -13,6 +13,7 @@ offline. Fewer features, lower battery use.
   releases, tests), for anyone who wants to understand or change kinkoku without reading every file.
 - [docs/abi.md](docs/abi.md): every host function an Aidoku source can call, and which ones kinkoku
   implements.
+- [docs/releases.md](docs/releases.md): what changed in each release.
 
 ## Install
 
@@ -42,7 +43,7 @@ updates** fetches the latest GitHub release for the same architecture and instal
 - **Settings**: download folder (default `/mnt/us/manga`; changing it offers to move existing files),
   e-ink optimization, dithering, Wi-Fi off after downloads, reading direction (left to right:
   swipe left or tap the right side for the next page; right to left: the opposite, for manga),
-  pages downloaded at once (1–4),
+  pages downloaded at once (tap it to type a number from 1 to 4),
   FlareSolverr host, cookie import, check for updates.
 
 Chapters are saved as `<folder>/<Manga Title>/<NNN.N> - <Chapter Title>.cbz` with a `ComicInfo.xml`,

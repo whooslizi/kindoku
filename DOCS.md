@@ -111,12 +111,16 @@ chapter") in KOReader's `settings/kinkoku.lua`.
   Settings.
 - After a chapter's last page, `hookEndOfBook` opens the next chapter, downloading it (and
   refreshing the chapter list from the source) when needed.
+- Settings that take a value (download folder, pages downloaded at once, FlareSolverr host) open a
+  dialog to choose or type it; on/off settings toggle on tap.
 - `kinkoku_l10n.lua` holds Vietnamese translations; English strings are the keys.
 
 ## Builds and releases
 
 - `scripts/build.sh` cross-compiles static binaries into `kinkoku.koplugin/bin/<arch>/kinkoku`
   and bakes in the version and architecture.
+- Each release's changes are listed in [docs/releases.md](docs/releases.md); add an entry under
+  "Unreleased" with every change.
 - `.github/workflows/release.yml` runs vet, tests and luacheck on every push. On the default
   branch it publishes a release with one `kinkoku-<arch>.koplugin.zip` per architecture.
 - `kinkoku update --plugin <dir>` (Settings > Check for updates) downloads the zip for its own
