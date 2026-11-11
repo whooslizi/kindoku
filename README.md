@@ -7,6 +7,13 @@ offline. Fewer features, lower battery use.
 - `kinkoku`: one static Go binary. It runs one command, prints JSON and exits. No daemon, no database.
 - `kinkoku.koplugin`: a KOReader plugin that calls the binary and shows text-only, e-ink friendly menus.
 
+## Documentation
+
+- [DOCS.md](DOCS.md): how the repo fits together (the binary, the plugin, downloads, state on disk,
+  releases, tests), for anyone who wants to understand or change kinkoku without reading every file.
+- [docs/abi.md](docs/abi.md): every host function an Aidoku source can call, and which ones kinkoku
+  implements.
+
 ## Install
 
 1. Download the zip for your device from the [latest release](../../releases/latest):
@@ -108,12 +115,18 @@ source name.
 
 ## Credits
 
+- [Aidoku](https://github.com/Aidoku/Aidoku): the manga reader whose sources kinkoku runs.
 - [AidokuRunner](https://github.com/Aidoku/AidokuRunner) by Skittyblock: kinkoku's source runner follows
   its behavior (how sources are loaded, the host import modules, encoding and error conventions).
 - [aidoku-rs](https://github.com/Aidoku/aidoku-rs) (MIT): the source SDK that defines the ABI.
 - [Aidoku Community sources](https://github.com/Aidoku-Community/sources) (MIT/Apache-2.0); one of them
   is used as a test fixture (see `source/testdata/NOTICE`).
+- [Rakuyomi](https://github.com/hanatsumi/rakuyomi) by hanatsumi, and its maintained fork
+  [tachibana-shin/rakuyomi](https://github.com/tachibana-shin/rakuyomi): the KOReader manga plugin that
+  showed Aidoku sources can run on e-readers, and the reference for kinkoku's download behavior.
+- [KOReader](https://github.com/koreader/koreader): the reader kinkoku plugs into.
+- [FlareSolverr](https://github.com/FlareSolverr/FlareSolverr): optional, for sites behind Cloudflare.
 - [wazero](https://wazero.io), [cascadia](https://github.com/andybalholm/cascadia),
   golang.org/x/net/html and golang.org/x/image.
 
-Not affiliated with Aidoku or KOReader.
+Not affiliated with Aidoku, Rakuyomi or KOReader.
