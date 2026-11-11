@@ -102,3 +102,14 @@ func TestAbortRemovesTemp(t *testing.T) {
 		t.Fatalf("left %v", m)
 	}
 }
+
+func TestFlatName(t *testing.T) {
+	n := float32(12.5)
+	if got := FlatName("One: Piece", &n, "Romance Dawn", "k"); got != "One_ Piece - 012.5 - Romance Dawn" {
+		t.Errorf("FlatName = %q", got)
+	}
+	long := strings.Repeat("Long title ", 40)
+	if got := FlatName(long, &n, "", "k"); !strings.HasSuffix(got, " - 012.5") || len(got) > maxNameBytes-14 {
+		t.Errorf("long title lost the chapter part: %q", got)
+	}
+}

@@ -40,13 +40,15 @@ updates** fetches the latest GitHub release for the same architecture and instal
 - Turning past the last page of a chapter opens the next one, downloading it first if needed. If
   kinkoku doesn't know a next chapter yet, it asks the source for new ones.
 - **Settings**: download folder (default `/mnt/us/manga`; changing it offers to move existing files),
-  e-ink optimization, dithering, Wi-Fi off after downloads, reading direction (left to right:
-  swipe left or tap the right side for the next page; right to left: the opposite, for manga),
-  pages downloaded at once (tap it to type a number from 1 to 4),
+  e-ink optimization, dithering, whether each manga gets its own folder, Wi-Fi off after downloads,
+  reading direction (left to right: swipe left or tap the right side for the next page; right to
+  left: the opposite, for manga), pages downloaded at once (tap it to type a number from 1 to 4),
   FlareSolverr host, cookie import, check for updates.
 
 Chapters are saved as `<folder>/<Manga Title>/<NNN.N> - <Chapter Title>.cbz` with a `ComicInfo.xml`,
-plus `cover.jpg` once per manga. They are plain CBZs: KOReader opens them with the plugin disabled.
+plus `cover.jpg` once per manga. With **Save each manga in its own folder** off, they go straight into
+the folder as `<Manga Title> - <NNN.N> - <Chapter Title>.cbz`, without a cover. They are plain CBZs:
+KOReader opens them with the plugin disabled.
 
 With e-ink optimization on (the default), pages are converted to 16-level grayscale, downscaled
 (never upscaled) to fit the screen (strips taller than 2:1 are fitted to the width only), and saved
@@ -67,7 +69,7 @@ kinkoku search <src> <query> [--page N] [--filters JSON]
 kinkoku search-all <query>
 kinkoku listing <src> <listingId> [--page N]
 kinkoku manga <src> <mangaKey>
-kinkoku download <src> <mangaKey> <chapterKey...> --out <folder> [--eink] [--dither] [--maxw 1072 --maxh 1448] [--conc 2]
+kinkoku download <src> <mangaKey> <chapterKey...> --out <folder> [--eink] [--dither] [--maxw 1072 --maxh 1448] [--conc 2] [--flat]
 kinkoku index list | index rm <relPath> [--out <folder>] | index move <fromFolder> <toFolder>
 kinkoku settings get <src> [key] | settings set <src> <key> <value>
 kinkoku cookies import <cookies.txt> | cookies clear

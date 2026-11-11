@@ -92,6 +92,7 @@ local vi = {
     ["kinkoku stopped unexpectedly."] = "kinkoku dừng đột ngột.",
     ["1 to 4. Higher is faster on good Wi-Fi."] = "Từ 1 đến 4. Càng cao càng nhanh khi Wi-Fi tốt.",
     ["Enter a whole number from 1 to 4."] = "Hãy nhập một số nguyên từ 1 đến 4.",
+    ["Save each manga in its own folder"] = "Lưu mỗi truyện vào thư mục riêng",
 }
 
 local lang = G_reader_settings and G_reader_settings:readSetting("language") or ""

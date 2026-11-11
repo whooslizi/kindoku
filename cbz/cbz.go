@@ -71,6 +71,12 @@ type ComicInfo struct {
 	Web       string   `xml:"Web,omitempty"`
 }
 
+// FlatName is ChapterName prefixed with the manga title, for downloads saved without manga
+// folders. The title is shortened first so the chapter part always survives.
+func FlatName(manga string, number *float32, title, key string) string {
+	return trimBytes(Sanitize(trimBytes(Sanitize(manga), maxNameBytes/2)+" - "+ChapterName(number, title, key)), maxNameBytes-14)
+}
+
 // FormatNumber renders a chapter number without trailing zeros ("12", "12.5").
 func FormatNumber(n *float32) string {
 	if n == nil {

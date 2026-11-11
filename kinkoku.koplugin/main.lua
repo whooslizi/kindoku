@@ -693,6 +693,7 @@ function Kinkoku:download(src_id, manga_key, keys, opts)
         }) do table.insert(args, a) end
         if self:setting("eink", true) then table.insert(args, "--eink") end
         if self:setting("dither", false) then table.insert(args, "--dither") end
+        if not self:setting("manga_folders", true) then table.insert(args, "--flat") end
 
         local r, err = self:run(args, _("Downloading…"), function(line)
             local ok, p = pcall(JSON.decode, line)
@@ -741,7 +742,7 @@ function Kinkoku:showDownloads(menu)
         if not entries then return err end
         local groups, order = {}, {}
         for __, e in ipairs(list(entries)) do
-            local manga = e.relPath:match("^(.-)/[^/]*$") or e.relPath
+            local manga = e.relPath:match("^(.-)/[^/]*$") or str(e.title) or e.relPath
             if not groups[manga] then
                 groups[manga] = {}
                 table.insert(order, manga)
@@ -803,6 +804,7 @@ function Kinkoku:settingsItems()
         { text = _("Download folder"), mandatory = self:folder(), callback = function() self:chooseFolder() end },
         toggle("eink", true, _("E-ink page optimization")),
         toggle("dither", false, _("Dithering")),
+        toggle("manga_folders", true, _("Save each manga in its own folder")),
         toggle("wifi_off", true, _("Turn Wi-Fi off after downloads")),
         { text = _("Reading direction"), mandatory = self:setting("reading_direction", "ltr") == "rtl" and _("Right to left") or _("Left to right"), callback = function()
             self:save("reading_direction", self:setting("reading_direction", "ltr") == "rtl" and "ltr" or "rtl")
