@@ -30,7 +30,8 @@ updates** fetches the latest GitHub release for the same architecture and instal
 - A manga: tap a chapter to download and open it. To download several at once, hold chapters to
   select them, then tap **Download selected**. Downloaded chapters are marked "downloaded".
 - **Downloads**: everything you downloaded, grouped by manga. Long-press a chapter to delete it.
-- At the end of a chapter, kinkoku offers the **next chapter** (and downloads it if needed).
+- Turning past the last page of a chapter opens the next one, downloading it first if needed. If
+  kinkoku doesn't know a next chapter yet, it asks the source for new ones.
 - **Settings**: download folder (default `/mnt/us/manga`; changing it offers to move existing files),
   e-ink optimization, dithering, Wi-Fi off after downloads, pages downloaded at once (1–4),
   FlareSolverr host, cookie import, check for updates.

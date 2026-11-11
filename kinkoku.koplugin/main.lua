@@ -547,7 +547,7 @@ function Kinkoku:rememberChapters(src_id, manga)
     local chapters = list(manga.chapters)
     local order = {}
     for i = #chapters, 1, -1 do
-        table.insert(order, { key = chapters[i].key, label = chapter_label(chapters[i]) })
+        table.insert(order, { key = chapters[i].key })
     end
     local all = self:setting("chapter_order", {})
     all[src_id .. "|" .. manga.key] = { chapters = order, ts = os.time() }
@@ -647,7 +647,7 @@ end
 -- downloadChapters downloads chapters of the open manga; with open_after, it then opens the first.
 function Kinkoku:downloadChapters(keys, open_after)
     local cur = self.current
-    self:download(cur.src.id, cur.manga.key, keys, function(result)
+    self:download(cur.src.id, cur.manga.key, keys, { quiet = open_after, done = function(result)
         for __, ch in ipairs(list(result.chapters)) do
             if str(ch.relPath) then cur.downloaded[ch.key] = ch.relPath end
             cur.selected[ch.key] = nil
@@ -655,12 +655,15 @@ function Kinkoku:downloadChapters(keys, open_after)
         self:update(cur.menu, self:mangaItems())
         local first = list(result.chapters)[1]
         if open_after and first and str(first.relPath) then self:openChapter(first.relPath) end
-    end, open_after)
+    end })
 end
 
--- download runs one binary for all chapters; quiet skips the summary when everything succeeded.
-function Kinkoku:download(src_id, manga_key, keys, done, quiet)
-    local wifi_was_on = NetworkMgr:isWifiOn()
+-- download runs one binary for all chapters. opts: done(result); quiet skips the summary when
+-- everything succeeded; wifi_was_on overrides the Wi-Fi state to restore afterwards.
+function Kinkoku:download(src_id, manga_key, keys, opts)
+    opts = opts or {}
+    local wifi_was_on = opts.wifi_was_on
+    if wifi_was_on == nil then wifi_was_on = NetworkMgr:isWifiOn() end
     self:online(function()
         local index = {}
         for i, k in ipairs(keys) do index[k] = i end
@@ -682,9 +685,7 @@ function Kinkoku:download(src_id, manga_key, keys, done, quiet)
                 return T(_("Chapter %1/%2, page %3/%4"), index[p.ch] or "?", #keys, p.p, p.n)
             end
         end)
-        if not wifi_was_on and self:setting("wifi_off", true) and Device:hasWifiToggle() then
-            NetworkMgr:turnOffWifi()
-        end
+        self:restoreWifi(wifi_was_on)
         if not r then return err end
         local ok_count, failures = 0, {}
         for __, ch in ipairs(list(r.chapters)) do
@@ -694,13 +695,19 @@ function Kinkoku:download(src_id, manga_key, keys, done, quiet)
                 ok_count = ok_count + 1
             end
         end
-        if not quiet or #failures > 0 then
+        if not opts.quiet or #failures > 0 then
             local msg = T(_("Downloaded %1 chapter(s)."), ok_count)
             if #failures > 0 then msg = msg .. "\n" .. table.concat(failures, "\n") end
             UIManager:show(InfoMessage:new{ text = msg, timeout = #failures == 0 and 3 or nil })
         end
-        if done then done(r) end
+        if opts.done then opts.done(r) end
     end)
+end
+
+function Kinkoku:restoreWifi(was_on)
+    if not was_on and self:setting("wifi_off", true) and Device:hasWifiToggle() then
+        NetworkMgr:turnOffWifi()
+    end
 end
 
 function Kinkoku:openChapter(rel)
@@ -903,6 +910,14 @@ function Kinkoku:hookEndOfBook()
     end
 end
 
+local function next_chapter(order, key)
+    for i, c in ipairs(order and order.chapters or {}) do
+        if c.key == key then return order.chapters[i + 1] end
+    end
+end
+
+-- onChapterEnd opens the next chapter, downloading it first if needed. When the next chapter isn't
+-- known yet, it asks the source, which may have published new ones.
 function Kinkoku:onChapterEnd(rel)
     local bin = self:binary()
     if not bin then return false end
@@ -919,35 +934,35 @@ function Kinkoku:onChapterEnd(rel)
     end
     if not current then return false end
     local manga_id = current.source .. "|" .. current.mangaKey
-    local info = self:setting("chapter_order", {})[manga_id]
-    if not info then return false end
-    local next_ch
-    for i, c in ipairs(info.chapters) do
-        if c.key == current.chapterKey then next_ch = info.chapters[i + 1] end
+    local wifi_was_on = NetworkMgr:isWifiOn()
+    local function open(next_ch)
+        local downloaded = by_key[manga_id .. "|" .. next_ch.key]
+        if downloaded then
+            self:openChapter(downloaded.relPath)
+            return
+        end
+        self:download(current.source, current.mangaKey, { next_ch.key }, { quiet = true, wifi_was_on = wifi_was_on, done = function(r)
+            local ch = list(r.chapters)[1]
+            if ch and str(ch.relPath) then self:openChapter(ch.relPath) end
+        end })
     end
-    if not next_ch then
-        UIManager:show(InfoMessage:new{ text = _("This was the last chapter."), timeout = 3 })
+    local next_ch = next_chapter(self:setting("chapter_order", {})[manga_id], current.chapterKey)
+    if next_ch then
+        open(next_ch)
         return true
     end
-    local downloaded = by_key[manga_id .. "|" .. next_ch.key]
-    if downloaded then
-        UIManager:show(ConfirmBox:new{
-            text = _("Next chapter") .. ":\n" .. next_ch.label,
-            ok_text = _("Next chapter"),
-            ok_callback = function() self:openChapter(downloaded.relPath) end,
-        })
-        return true
-    end
-    UIManager:show(ConfirmBox:new{
-        text = _("Next chapter is not downloaded. Download it now?") .. "\n" .. next_ch.label,
-        ok_text = _("Download"),
-        ok_callback = function()
-            self:download(current.source, current.mangaKey, { next_ch.key }, function(r)
-                local ch = list(r.chapters)[1]
-                if ch and str(ch.relPath) then self:openChapter(ch.relPath) end
-            end)
-        end,
-    })
+    self:online(function()
+        local r, err = self:run({ "manga", current.source, current.mangaKey }, _("Looking for the next chapter…"))
+        if r then
+            self:rememberChapters(current.source, r.manga)
+            next_ch = next_chapter(self:setting("chapter_order", {})[manga_id], current.chapterKey)
+        end
+        if not next_ch then
+            self:restoreWifi(wifi_was_on)
+            return err or _("This was the last chapter.")
+        end
+        UIManager:nextTick(function() open(next_ch) end)
+    end)
     return true
 end
 

@@ -109,7 +109,8 @@ chapter") in KOReader's `settings/kinkoku.lua`.
 - `Kinkoku:show` opens one full-screen `Menu` per screen. Back closes only that screen.
 - Library is the home screen. The top-left menu opens Search all sources, Sources, Downloads and
   Settings.
-- After a chapter's last page, `hookEndOfBook` offers the next chapter, downloading it if needed.
+- After a chapter's last page, `hookEndOfBook` opens the next chapter, downloading it (and
+  refreshing the chapter list from the source) when needed.
 - `kinkoku_l10n.lua` holds Vietnamese translations; English strings are the keys.
 
 ## Builds and releases

@@ -44,9 +44,6 @@ local vi = {
     ["Clear cookies"] = "Xóa cookie",
     ["Imported %1 cookie(s)."] = "Đã nhập %1 cookie.",
     ["Cookies cleared."] = "Đã xóa cookie.",
-    ["Next chapter"] = "Chương sau",
-    ["Next chapter is not downloaded. Download it now?"] = "Chương sau chưa được tải. Tải ngay?",
-    ["Download"] = "Tải",
     ["This was the last chapter."] = "Đây là chương cuối.",
     ["No kinkoku binary for this device (%1)."] = "Không có tệp chạy kinkoku cho thiết bị này (%1).",
     ["Error: %1"] = "Lỗi: %1",
@@ -87,6 +84,7 @@ local vi = {
     ["Updated to %1. Restart KOReader to use it."] = "Đã cập nhật lên %1. Khởi động lại KOReader để dùng.",
     ["Tap a chapter to read it, hold to select several"] = "Chạm một chương để đọc, giữ để chọn nhiều chương",
     ["Hold chapters to select them first."] = "Hãy giữ các chương để chọn trước.",
+    ["Looking for the next chapter…"] = "Đang tìm chương sau…",
 }
 
 local lang = G_reader_settings and G_reader_settings:readSetting("language") or ""
