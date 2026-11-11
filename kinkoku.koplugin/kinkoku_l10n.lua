@@ -89,6 +89,7 @@ local vi = {
     ["Left to right"] = "Trái sang phải",
     ["Right to left"] = "Phải sang trái",
     ["Tap to cancel"] = "Chạm để hủy",
+    ["kinkoku stopped unexpectedly."] = "kinkoku dừng đột ngột.",
 }
 
 local lang = G_reader_settings and G_reader_settings:readSetting("language") or ""

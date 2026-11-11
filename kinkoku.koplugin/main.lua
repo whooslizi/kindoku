@@ -102,6 +102,12 @@ on_progress(stderr_line) may return a new status text.
 function Kinkoku:run(args, text, on_progress)
     local bin = self:binary()
     if not bin then return nil, self.bin_error end
+    -- an update leaves the new binary next to the old one; swap it in while nothing runs it
+    local staged = io.open(bin .. ".new", "rb")
+    if staged then
+        staged:close()
+        os.rename(bin .. ".new", bin)
+    end
     local pid_file = self.data_dir .. "/run.pid"
     local err_file = self.data_dir .. "/run.log"
     os.execute("mkdir -p " .. shell_quote(self.data_dir))
@@ -112,9 +118,10 @@ function Kinkoku:run(args, text, on_progress)
     if flare ~= "" then table.insert(env, "KINKOKU_FLARESOLVERR=" .. shell_quote(flare)) end
     local quoted = {}
     for __, a in ipairs(args) do table.insert(quoted, shell_quote(a)) end
-    -- dismissablePopen doesn't kill on cancel; `exec` keeps the pid in run.pid so we can
-    local cmd = string.format("echo $$ > %s; exec env %s %s %s 2> %s",
-        shell_quote(pid_file), table.concat(env, " "), shell_quote(bin), table.concat(quoted, " "), shell_quote(err_file))
+    -- dismissablePopen doesn't kill on cancel, so run.pid lets us. It also waits for stdout data
+    -- forever: the trailing echo guarantees some even if the binary dies without printing.
+    local cmd = string.format("env %s %s %s 2> %s & echo $! > %s; wait $!; echo",
+        table.concat(env, " "), shell_quote(bin), table.concat(quoted, " "), shell_quote(err_file), shell_quote(pid_file))
 
     -- An invisible modal trap catches the tap that cancels; the centered box sits below it
     -- (non-modal), so it can be swapped for progress updates without losing the trap.
@@ -157,7 +164,8 @@ function Kinkoku:run(args, text, on_progress)
     local ok, result = pcall(JSON.decode, output or "")
     if not ok or type(result) ~= "table" then
         logger.warn("kinkoku: bad output", output, read_file(err_file))
-        return nil, T(_("Error: %1"), (read_file(err_file) or ""):sub(-300))
+        local log = (read_file(err_file) or ""):sub(-300)
+        return nil, T(_("Error: %1"), log ~= "" and log or _("kinkoku stopped unexpectedly."))
     end
     if str(result.error) then return nil, result.error end
     return result

@@ -90,7 +90,9 @@ func installPlugin(b []byte, dir string) error {
 		if !ok || f.FileInfo().IsDir() || !filepath.IsLocal(rel) {
 			continue
 		}
-		if err := extract(f, filepath.Join(dir, rel)); err != nil {
+		// The running binary can't safely be replaced (on the Kindle it can crash mid-update):
+		// leave it as kinkoku.new for the plugin to swap in before the next run.
+		if err := extract(f, filepath.Join(dir, rel), strings.HasPrefix(rel, "bin/")); err != nil {
 			return err
 		}
 		n++
@@ -101,7 +103,7 @@ func installPlugin(b []byte, dir string) error {
 	return nil
 }
 
-func extract(f *zip.File, path string) error {
+func extract(f *zip.File, path string, stageOnly bool) error {
 	r, err := f.Open()
 	if err != nil {
 		return err
@@ -121,7 +123,9 @@ func extract(f *zip.File, path string) error {
 	}
 	if err == nil {
 		os.Chmod(tmp, f.Mode().Perm()|0o644) // best-effort: FAT32 refuses chmod
-		err = os.Rename(tmp, path)
+		if !stageOnly {
+			err = os.Rename(tmp, path)
+		}
 	}
 	if err != nil {
 		os.Remove(tmp)

@@ -33,7 +33,10 @@ func TestInstallPlugin(t *testing.T) {
 	if b, _ := os.ReadFile(filepath.Join(dir, "main.lua")); string(b) != "new lua" {
 		t.Errorf("main.lua = %q", b)
 	}
-	if fi, err := os.Stat(filepath.Join(dir, "bin/armv7/kinkoku")); err != nil || fi.Mode()&0o100 == 0 {
+	if _, err := os.Stat(filepath.Join(dir, "bin/armv7/kinkoku")); err == nil {
+		t.Error("the running binary must not be replaced")
+	}
+	if fi, err := os.Stat(filepath.Join(dir, "bin/armv7/kinkoku.new")); err != nil || fi.Mode()&0o100 == 0 {
 		t.Errorf("binary: %v %v", fi, err)
 	}
 	for _, p := range []string{filepath.Join(root, "evil"), filepath.Join(dir, "other")} {
