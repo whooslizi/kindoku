@@ -55,6 +55,19 @@ func Process(img image.Image, o Options) *image.Paletted {
 		gray = v
 	case *image.YCbCr: // JPEG: the luma plane already is the grayscale image
 		gray = &image.Gray{Pix: v.Y, Stride: v.YStride, Rect: v.Rect}
+	case *image.Paletted: // most PNG pages: map each palette entry once instead of every pixel
+		var lut [256]uint8
+		for i, c := range v.Palette {
+			lut[i] = color.GrayModel.Convert(c).(color.Gray).Y
+		}
+		gray = image.NewGray(b)
+		for y := b.Min.Y; y < b.Max.Y; y++ {
+			src := v.Pix[v.PixOffset(b.Min.X, y):][:b.Dx()]
+			dst := gray.Pix[gray.PixOffset(b.Min.X, y):]
+			for x, i := range src {
+				dst[x] = lut[i]
+			}
+		}
 	default:
 		gray = image.NewGray(b)
 		draw.Draw(gray, b, img, b.Min, draw.Src)
@@ -99,7 +112,8 @@ func floydSteinberg(g *image.Gray, out *image.Paletted) {
 
 func Encode(p *image.Paletted) []byte {
 	var buf bytes.Buffer
-	enc := png.Encoder{CompressionLevel: png.BestCompression}
+	// BestSpeed: BestCompression took 2/3 of a page's CPU time for 6% smaller files.
+	enc := png.Encoder{CompressionLevel: png.BestSpeed}
 	enc.Encode(&buf, p) // writing to a bytes.Buffer cannot fail
 	return buf.Bytes()
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"image"
 	"image/color"
+	"image/draw"
 	"image/jpeg"
 	"image/png"
 	"testing"
@@ -91,5 +92,19 @@ func TestQuantizeLevels(t *testing.T) {
 	p := Process(g, screen)
 	if p.Pix[0] != 0 || p.Pix[1] != 8 || p.Pix[2] != 15 {
 		t.Fatalf("levels = %v", p.Pix)
+	}
+}
+
+func TestPalettedMatchesDraw(t *testing.T) {
+	pal := color.Palette{color.Black, color.White, color.RGBA{200, 30, 90, 255}, color.RGBA{10, 180, 240, 255}}
+	p := image.NewPaletted(image.Rect(3, 5, 40, 60), pal)
+	for i := range p.Pix {
+		p.Pix[i] = uint8(i * 7 % len(pal))
+	}
+	rgba := image.NewRGBA(p.Rect)
+	draw.Draw(rgba, p.Rect, p, p.Rect.Min, draw.Src)
+	o := Options{MaxW: 100, MaxH: 100}
+	if a, b := Process(p, o), Process(rgba, o); !bytes.Equal(a.Pix, b.Pix) {
+		t.Fatal("paletted fast path differs from the generic conversion")
 	}
 }
