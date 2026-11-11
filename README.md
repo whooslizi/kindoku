@@ -27,8 +27,8 @@ updates** fetches the latest GitHub release for the same architecture and instal
   remove it.
 - The menu icon (top left) opens **Search all sources**, **Sources**, **Downloads** and **Settings**.
   Hold a search result to add it to or remove it from the library (saved ones show a star).
-- A manga: tap chapters to select them, then **Download selected**. Downloaded chapters are marked
-  "downloaded"; tap one to read it.
+- A manga: tap a chapter to download and open it. To download several at once, hold chapters to
+  select them, then tap **Download selected**. Downloaded chapters are marked "downloaded".
 - **Downloads**: everything you downloaded, grouped by manga. Long-press a chapter to delete it.
 - At the end of a chapter, kinkoku offers the **next chapter** (and downloads it if needed).
 - **Settings**: download folder (default `/mnt/us/manga`; changing it offers to move existing files),

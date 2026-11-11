@@ -85,6 +85,8 @@ local vi = {
     ["Update"] = "Cập nhật",
     ["Updating…"] = "Đang cập nhật…",
     ["Updated to %1. Restart KOReader to use it."] = "Đã cập nhật lên %1. Khởi động lại KOReader để dùng.",
+    ["Tap a chapter to read it, hold to select several"] = "Chạm một chương để đọc, giữ để chọn nhiều chương",
+    ["Hold chapters to select them first."] = "Hãy giữ các chương để chọn trước.",
 }
 
 local lang = G_reader_settings and G_reader_settings:readSetting("language") or ""

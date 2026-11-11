@@ -564,7 +564,7 @@ function Kinkoku:showManga(src, key)
         if not r then return err end
         self:rememberChapters(src.id, r.manga)
         self.current = { src = src, manga = r.manga, downloaded = list(r.downloaded), cover = str(r.coverPath), selected = {} }
-        self.current.menu = self:show(r.manga.title, self:mangaItems(), { subtitle = src.name })
+        self.current.menu = self:show(r.manga.title, self:mangaItems(), { subtitle = _("Tap a chapter to read it, hold to select several") })
     end)
 end
 
@@ -604,6 +604,11 @@ function Kinkoku:mangaItems()
                 if rel then
                     self:openChapter(rel)
                 elseif c.locked ~= true then
+                    self:downloadChapters({ c.key }, true)
+                end
+            end,
+            hold_callback = function()
+                if not rel and c.locked ~= true then
                     cur.selected[c.key] = not cur.selected[c.key] or nil
                     refresh()
                 end
@@ -628,22 +633,33 @@ function Kinkoku:showDetails()
 end
 
 function Kinkoku:downloadSelected()
-    local cur = self.current
     local keys = {}
-    for __, c in ipairs(list(cur.manga.chapters)) do
-        if cur.selected[c.key] then table.insert(keys, 1, c.key) end
+    for __, c in ipairs(list(self.current.manga.chapters)) do
+        if self.current.selected[c.key] then table.insert(keys, 1, c.key) end
     end
-    if #keys == 0 then return end
+    if #keys == 0 then
+        UIManager:show(InfoMessage:new{ text = _("Hold chapters to select them first."), timeout = 3 })
+        return
+    end
+    self:downloadChapters(keys)
+end
+
+-- downloadChapters downloads chapters of the open manga; with open_after, it then opens the first.
+function Kinkoku:downloadChapters(keys, open_after)
+    local cur = self.current
     self:download(cur.src.id, cur.manga.key, keys, function(result)
         for __, ch in ipairs(list(result.chapters)) do
             if str(ch.relPath) then cur.downloaded[ch.key] = ch.relPath end
             cur.selected[ch.key] = nil
         end
         self:update(cur.menu, self:mangaItems())
-    end)
+        local first = list(result.chapters)[1]
+        if open_after and first and str(first.relPath) then self:openChapter(first.relPath) end
+    end, open_after)
 end
 
-function Kinkoku:download(src_id, manga_key, keys, done)
+-- download runs one binary for all chapters; quiet skips the summary when everything succeeded.
+function Kinkoku:download(src_id, manga_key, keys, done, quiet)
     local wifi_was_on = NetworkMgr:isWifiOn()
     self:online(function()
         local index = {}
@@ -678,9 +694,11 @@ function Kinkoku:download(src_id, manga_key, keys, done)
                 ok_count = ok_count + 1
             end
         end
-        local msg = T(_("Downloaded %1 chapter(s)."), ok_count)
-        if #failures > 0 then msg = msg .. "\n" .. table.concat(failures, "\n") end
-        UIManager:show(InfoMessage:new{ text = msg, timeout = #failures == 0 and 3 or nil })
+        if not quiet or #failures > 0 then
+            local msg = T(_("Downloaded %1 chapter(s)."), ok_count)
+            if #failures > 0 then msg = msg .. "\n" .. table.concat(failures, "\n") end
+            UIManager:show(InfoMessage:new{ text = msg, timeout = #failures == 0 and 3 or nil })
+        end
         if done then done(r) end
     end)
 end
