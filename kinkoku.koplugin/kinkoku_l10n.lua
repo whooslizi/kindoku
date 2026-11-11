@@ -88,6 +88,7 @@ local vi = {
     ["Reading direction"] = "Hướng đọc",
     ["Left to right"] = "Trái sang phải",
     ["Right to left"] = "Phải sang trái",
+    ["Tap to cancel"] = "Chạm để hủy",
 }
 
 local lang = G_reader_settings and G_reader_settings:readSetting("language") or ""

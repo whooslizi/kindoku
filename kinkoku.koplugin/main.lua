@@ -116,8 +116,16 @@ function Kinkoku:run(args, text, on_progress)
     local cmd = string.format("echo $$ > %s; exec env %s %s %s 2> %s",
         shell_quote(pid_file), table.concat(env, " "), shell_quote(bin), table.concat(quoted, " "), shell_quote(err_file))
 
-    local trap = TrapWidget:new{ text = text }
+    -- An invisible modal trap catches the tap that cancels; the centered box sits below it
+    -- (non-modal), so it can be swapped for progress updates without losing the trap.
+    local function box(t)
+        local w = InfoMessage:new{ text = t, modal = false, dismissable = false }
+        UIManager:show(w)
+        return w
+    end
+    local trap = TrapWidget:new{}
     UIManager:show(trap)
+    local msg = box(text .. "\n" .. _("Tap to cancel"))
     UIManager:forceRePaint()
     local shown = text
     local ticker
@@ -129,11 +137,9 @@ function Kinkoku:run(args, text, on_progress)
             end
             local new_text = last and on_progress(last)
             if new_text and new_text ~= shown then
-                -- TrapWidget text is fixed: swap in a new one with the same dismiss hook
-                local next_trap = TrapWidget:new{ text = new_text, dismiss_callback = trap.dismiss_callback }
-                UIManager:show(next_trap)
-                UIManager:close(trap)
-                trap, shown = next_trap, new_text
+                local next_msg = box(new_text .. "\n" .. _("Tap to cancel"))
+                UIManager:close(msg)
+                msg, shown = next_msg, new_text
             end
             UIManager:scheduleIn(2, ticker)
         end
@@ -141,6 +147,7 @@ function Kinkoku:run(args, text, on_progress)
     end
     local completed, output = Trapper:dismissablePopen(cmd, trap)
     if ticker then UIManager:unschedule(ticker) end
+    UIManager:close(msg)
     UIManager:close(trap)
     if not completed then
         local pid = tonumber(read_file(pid_file) or "")
