@@ -40,10 +40,10 @@ updates** fetches the latest GitHub release for the same architecture and instal
 - Turning past the last page of a chapter opens the next one, downloading it first if needed. If
   kinkoku doesn't know a next chapter yet, it asks the source for new ones.
 - **Settings**: download folder (default `/mnt/us/manga`; changing it offers to move existing files),
-  e-ink optimization, dithering, Wi-Fi off after downloads, reading direction (left to right:
-  swipe left or tap the right side for the next page; right to left: the opposite, for manga),
-  pages downloaded at once (tap it to type a number from 1 to 4),
-  FlareSolverr host, cookie import, check for updates.
+  e-ink optimization, dithering, Wi-Fi off after downloads, view mode (page by page, the default, or
+  continuous scrolling for webtoons), reading direction (left to right: swipe left or tap the right
+  side for the next page; right to left: the opposite, for manga), pages downloaded at once (tap it
+  to type a number from 1 to 4), FlareSolverr host, cookie import, check for updates.
 
 Chapters are saved as `<folder>/<Manga Title>/<NNN.N> - <Chapter Title>.cbz` with a `ComicInfo.xml`,
 plus `cover.jpg` once per manga. They are plain CBZs: KOReader opens them with the plugin disabled.

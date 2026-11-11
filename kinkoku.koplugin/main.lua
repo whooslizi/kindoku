@@ -6,6 +6,7 @@ the JSON it prints in a Menu.
 local ButtonDialog = require("ui/widget/buttondialog")
 local ConfirmBox = require("ui/widget/confirmbox")
 local DataStorage = require("datastorage")
+local Event = require("ui/event")
 local Device = require("device")
 local InfoMessage = require("ui/widget/infomessage")
 local InputDialog = require("ui/widget/inputdialog")
@@ -804,6 +805,10 @@ function Kinkoku:settingsItems()
         toggle("eink", true, _("E-ink page optimization")),
         toggle("dither", false, _("Dithering")),
         toggle("wifi_off", true, _("Turn Wi-Fi off after downloads")),
+        { text = _("View mode"), mandatory = self:setting("view_mode", "page") == "continuous" and _("Continuous") or _("Page by page"), callback = function()
+            self:save("view_mode", self:setting("view_mode", "page") == "continuous" and "page" or "continuous")
+            self:update(self.settings_menu, self:settingsItems())
+        end },
         { text = _("Reading direction"), mandatory = self:setting("reading_direction", "ltr") == "rtl" and _("Right to left") or _("Left to right"), callback = function()
             self:save("reading_direction", self:setting("reading_direction", "ltr") == "rtl" and "ltr" or "rtl")
             self:update(self.settings_menu, self:settingsItems())
@@ -950,6 +955,15 @@ function Kinkoku:onReaderReady()
     -- set directly: ReaderView:onToggleReadingOrder would pop a notification on every chapter
     view.inverse_reading_order = self:setting("reading_direction", "ltr") == "rtl"
     view:setupTouchZones()
+    -- KOReader opens comics in continuous view by default, and every chapter is a new book to it.
+    -- Set directly, as ReaderView:onSetScrollMode does minus its zoom warning on every chapter.
+    local continuous = self:setting("view_mode", "page") == "continuous"
+    if self.ui.paging and (view.page_scroll and true or false) ~= continuous then
+        view.page_scroll = continuous
+        self.ui.document.configurable.page_scroll = continuous and 1 or 0
+        view:recalculate()
+        self.ui:handleEvent(Event:new("InitScrollPageStates"))
+    end
 end
 
 -- wraps ReaderStatus so it runs before other EndOfBook handlers
