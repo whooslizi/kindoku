@@ -789,6 +789,10 @@ function Kinkoku:settingsItems()
         toggle("eink", true, _("E-ink page optimization")),
         toggle("dither", false, _("Dithering")),
         toggle("wifi_off", true, _("Turn Wi-Fi off after downloads")),
+        { text = _("Reading direction"), mandatory = self:setting("reading_direction", "ltr") == "rtl" and _("Right to left") or _("Left to right"), callback = function()
+            self:save("reading_direction", self:setting("reading_direction", "ltr") == "rtl" and "ltr" or "rtl")
+            self:update(self.settings_menu, self:settingsItems())
+        end },
         { text = _("Pages downloaded at once"), mandatory = self:setting("concurrency", 2), callback = function()
             self:save("concurrency", self:setting("concurrency", 2) % 4 + 1)
             self:update(self.settings_menu, self:settingsItems())
@@ -895,14 +899,27 @@ function Kinkoku:importCookies()
     })
 end
 
+-- chapterRel returns the open document's path in the download folder, or nil if it isn't a chapter.
+function Kinkoku:chapterRel()
+    local file = self.ui.document and self.ui.document.file or ""
+    local folder = self:folder() .. "/"
+    if file:sub(1, #folder) ~= folder or not file:match("%.cbz$") then return nil end
+    return file:sub(#folder + 1)
+end
+
+function Kinkoku:onReaderReady()
+    local view = self.ui.view
+    if not view or not self:chapterRel() then return end
+    -- set directly: ReaderView:onToggleReadingOrder would pop a notification on every chapter
+    view.inverse_reading_order = self:setting("reading_direction", "ltr") == "rtl"
+    view:setupTouchZones()
+end
+
 -- wraps ReaderStatus so it runs before other EndOfBook handlers
 function Kinkoku:hookEndOfBook()
     local status = self.ui.status
-    if not status or not status.onEndOfBook then return end
-    local file = self.ui.document.file
-    local folder = self:folder() .. "/"
-    if file:sub(1, #folder) ~= folder or not file:match("%.cbz$") then return end
-    local rel = file:sub(#folder + 1)
+    local rel = self:chapterRel()
+    if not status or not status.onEndOfBook or not rel then return end
     local original = status.onEndOfBook
     status.onEndOfBook = function(s, ...)
         if self:onChapterEnd(rel) then return true end

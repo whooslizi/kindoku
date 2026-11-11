@@ -33,7 +33,9 @@ updates** fetches the latest GitHub release for the same architecture and instal
 - Turning past the last page of a chapter opens the next one, downloading it first if needed. If
   kinkoku doesn't know a next chapter yet, it asks the source for new ones.
 - **Settings**: download folder (default `/mnt/us/manga`; changing it offers to move existing files),
-  e-ink optimization, dithering, Wi-Fi off after downloads, pages downloaded at once (1–4),
+  e-ink optimization, dithering, Wi-Fi off after downloads, reading direction (left to right:
+  swipe left or tap the right side for the next page; right to left: the opposite, for manga),
+  pages downloaded at once (1–4),
   FlareSolverr host, cookie import, check for updates.
 
 Chapters are saved as `<folder>/<Manga Title>/<NNN.N> - <Chapter Title>.cbz` with a `ComicInfo.xml`,
@@ -90,6 +92,19 @@ scripts/build.sh                           # builds kinkoku.koplugin/bin/{armv6,
 
 Every push to the default branch runs the tests, builds all architectures and publishes a GitHub
 release with one `kinkoku-<arch>.koplugin.zip` per architecture.
+
+## Reporting bugs
+
+Open an issue with what you did, what you expected, and the logs. On a Kindle they are in
+`/mnt/us/koreader/` (on other devices, the KOReader folder):
+
+- `settings/kinkoku/logs/error.log`: every failed kinkoku command.
+- `settings/kinkoku/logs/crash.log`: kinkoku crashes.
+- `settings/kinkoku/run.log`: the output of the last kinkoku command.
+- `crash.log`: KOReader's own log, for errors in the plugin.
+
+Also include your device, the kinkoku version (Settings > Check for updates shows it) and the
+source name.
 
 ## Credits
 

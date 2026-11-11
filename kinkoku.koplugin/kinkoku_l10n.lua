@@ -85,6 +85,9 @@ local vi = {
     ["Tap a chapter to read it, hold to select several"] = "Chạm một chương để đọc, giữ để chọn nhiều chương",
     ["Hold chapters to select them first."] = "Hãy giữ các chương để chọn trước.",
     ["Looking for the next chapter…"] = "Đang tìm chương sau…",
+    ["Reading direction"] = "Hướng đọc",
+    ["Left to right"] = "Trái sang phải",
+    ["Right to left"] = "Phải sang trái",
 }
 
 local lang = G_reader_settings and G_reader_settings:readSetting("language") or ""
