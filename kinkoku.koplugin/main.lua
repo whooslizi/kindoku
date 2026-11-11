@@ -731,7 +731,8 @@ function Kinkoku:openChapter(rel)
     local path = self:folder() .. "/" .. rel
     self:closeAll()
     if self.ui.document then
-        self.ui:switchDocument(path)
+        -- deferred: from EndOfBook, ReaderPaging keeps using the document after the event returns
+        UIManager:nextTick(function() self.ui:switchDocument(path) end)
     else
         require("apps/reader/readerui"):showReader(path)
     end
