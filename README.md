@@ -13,7 +13,6 @@ offline. Fewer features, lower battery use.
   releases, tests), for anyone who wants to understand or change kinkoku without reading every file.
 - [docs/abi.md](docs/abi.md): every host function an Aidoku source can call, and which ones kinkoku
   implements.
-- [docs/releases.md](docs/releases.md): what changed in each release.
 
 ## Install
 
